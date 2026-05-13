@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>步云鞋垫 · 价格填报管理系统</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --primary:#1677ff;--primary-dark:#0958d9;--success:#52c41a;--danger:#ff4d4f;
+  --warn:#faad14;--bg:#f0f2f5;--card:#fff;--border:#d9d9d9;--text:#262626;
+  --text2:#595959;--text3:#8c8c8c;--radius:8px;--shadow:0 2px 8px rgba(0,0,0,.08);
+}
+body{font-family:'Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+/* 顶栏 */
+.topbar{background:linear-gradient(135deg,#0a2540 0%,#1677ff 100%);color:#fff;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,.2);position:sticky;top:0;z-index:100}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.logo{width:36px;height:36px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.topbar-title{font-size:18px;font-weight:700;letter-spacing:1px}
+.topbar-sub{font-size:12px;opacity:.7;margin-top:2px}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.rate-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:4px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:.2s}
+.rate-badge:hover{background:rgba(255,255,255,.25)}
+/* 操作栏 */
+.toolbar{padding:16px 24px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;background:#fff;border-bottom:1px solid var(--border)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:500;transition:.2s;white-space:nowrap}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-dark)}
+.btn-success{background:var(--success);color:#fff}
+.btn-success:hover{background:#389e0d}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-danger:hover{background:#cf1322}
+.btn-default{background:#fff;color:var(--text);border:1px solid var(--border)}
+.btn-default:hover{border-color:var(--primary);color:var(--primary)}
+.btn-warn{background:var(--warn);color:#fff}
+.btn-warn:hover{background:#d48806}
+.search-wrap{flex:1;min-width:200px;max-width:360px;position:relative}
+.search-input{width:100%;height:34px;border:1px solid var(--border);border-radius:6px;padding:0 36px 0 12px;font-size:13px;outline:none;transition:.2s}
+.search-input:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(22,119,255,.15)}
+.search-icon{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--text3)}
+.filter-select{height:34px;border:1px solid var(--border);border-radius:6px;padding:0 10px;font-size:13px;outline:none;background:#fff;cursor:pointer}
+.filter-select:focus{border-color:var(--primary)}
+/* 统计卡片 */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:16px 24px}
+.stat-card{background:#fff;border-radius:var(--radius);padding:16px 20px;box-shadow:var(--shadow)}
+.stat-num{font-size:28px;font-weight:700;line-height:1}
+.stat-label{font-size:12px;color:var(--text3);margin-top:6px}
+.stat-card.blue .stat-num{color:var(--primary)}
+.stat-card.green .stat-num{color:var(--success)}
+.stat-card.orange .stat-num{color:#fa8c16}
+.stat-card.red .stat-num{color:var(--danger)}
+/* 主内容 */
+.main{padding:0 24px 24px}
+/* 分组卡片 */
+.group-section{margin-bottom:20px}
+.group-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.group-title{font-size:15px;font-weight:700;color:var(--primary);display:flex;align-items:center;gap:8px}
+.group-title::before{content:'';width:4px;height:16px;background:var(--primary);border-radius:2px;display:inline-block}
+.group-count{background:#e6f4ff;color:var(--primary);border-radius:10px;padding:2px 8px;font-size:12px}
+/* 表格 */
+.table-wrap{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead tr{background:#fafafa;border-bottom:2px solid #f0f0f0}
+th{padding:10px 12px;text-align:left;font-weight:600;color:var(--text2);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid #f5f5f5;vertical-align:middle}
+tbody tr:hover{background:#fafffe}
+tbody tr:last-child td{border-bottom:none}
+.product-img{width:52px;height:52px;object-fit:cover;border-radius:6px;cursor:pointer;border:1px solid #eee;transition:.2s}
+.product-img:hover{transform:scale(1.08);box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.no-img{width:52px;height:52px;background:#f5f5f5;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:20px;border:1px dashed #ddd}
+.model-tag{background:#e6f4ff;color:var(--primary);border-radius:4px;padding:2px 8px;font-weight:600;font-size:12px}
+.price-cny{font-weight:700;color:#cf1322;font-size:14px}
+.price-usd{color:#096dd9;font-size:12px}
+.tag{display:inline-block;border-radius:4px;padding:1px 7px;font-size:11px;margin:1px 0}
+.tag-spec{background:#fff7e6;color:#d46b08;border:1px solid #ffd591}
+.tag-weight{background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f}
+.tag-box{background:#f0f5ff;color:#2f54eb;border:1px solid #adc6ff}
+.action-btns{display:flex;gap:6px;flex-wrap:nowrap}
+.btn-sm{padding:4px 10px;font-size:12px;border-radius:4px}
+.checkbox-col{width:40px;text-align:center}
+input[type=checkbox]{width:15px;height:15px;cursor:pointer}
+/* 空状态 */
+.empty{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty-icon{font-size:48px;margin-bottom:12px}
+/* 弹窗 */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:12px;width:100%;max-width:720px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-header{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-title{font-size:16px;font-weight:700}
+.modal-close{width:28px;height:28px;border:none;background:#f5f5f5;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:.2s}
+.modal-close:hover{background:#ff4d4f;color:#fff}
+.modal-body{padding:20px 24px;overflow-y:auto;flex:1}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;flex-shrink:0}
+/* 表单 */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-item{display:flex;flex-direction:column;gap:6px}
+.form-item.full{grid-column:1/-1}
+.form-label{font-size:13px;font-weight:600;color:var(--text2)}
+.form-label .req{color:var(--danger);margin-left:2px}
+.form-input{height:36px;border:1px solid var(--border);border-radius:6px;padding:0 12px;font-size:13px;outline:none;transition:.2s}
+.form-input:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(22,119,255,.12)}
+.form-input.error{border-color:var(--danger)}
+.form-textarea{border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:13px;outline:none;resize:vertical;min-height:60px;transition:.2s;font-family:inherit}
+.form-textarea:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(22,119,255,.12)}
+.form-hint{font-size:11px;color:var(--text3)}
+/* 图片上传区 */
+.upload-zone{border:2px dashed var(--border);border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:.2s;position:relative}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--primary);background:#e6f4ff}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-preview{position:relative;display:inline-block;margin-top:10px}
+.upload-preview img{max-width:200px;max-height:160px;border-radius:8px;border:1px solid var(--border)}
+.upload-preview .remove-img{position:absolute;top:-6px;right:-6px;width:22px;height:22px;background:var(--danger);color:#fff;border-radius:50%;border:none;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center}
+/* 分割线 */
+.section-title{font-size:13px;font-weight:700;color:var(--text2);margin:4px 0 12px;padding-bottom:8px;border-bottom:1px solid #f0f0f0;grid-column:1/-1;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
+/* 图片预览大图 */
+.img-viewer{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2000;display:none;align-items:center;justify-content:center}
+.img-viewer.show{display:flex}
+.img-viewer img{max-width:90vw;max-height:90vh;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.5)}
+.img-viewer-close{position:fixed;top:20px;right:24px;color:#fff;font-size:32px;cursor:pointer;background:rgba(0,0,0,.5);width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:none}
+/* 汇率弹窗 */
+.rate-modal{max-width:400px}
+/* Toast */
+.toast-wrap{position:fixed;top:80px;right:24px;z-index:3000;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:#fff;border-radius:8px;padding:12px 18px;box-shadow:0 4px 20px rgba(0,0,0,.15);display:flex;align-items:center;gap:10px;font-size:13px;pointer-events:auto;animation:slideIn .3s ease;border-left:4px solid var(--primary)}
+.toast.success{border-color:var(--success)}
+.toast.error{border-color:var(--danger)}
+.toast.warn{border-color:var(--warn)}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes fadeOut{to{opacity:0;transform:translateX(100%)}}
+/* 分页 */
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid #f0f0f0}
+.page-info{font-size:12px;color:var(--text3)}
+.page-btns{display:flex;gap:4px}
+.page-btn{width:32px;height:32px;border:1px solid var(--border);border-radius:4px;background:#fff;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:.2s}
+.page-btn:hover,.page-btn.active{border-color:var(--primary);color:var(--primary)}
+.page-btn.active{background:#e6f4ff}
+.page-btn:disabled{opacity:.4;cursor:not-allowed}
+/* 加载动画 */
+.loading{display:flex;align-items:center;justify-content:center;padding:60px;gap:12px;color:var(--text3)}
+.spin{width:20px;height:20px;border:2px solid #f0f0f0;border-top-color:var(--primary);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* 批量操作栏 */
+.batch-bar{display:none;background:#e6f4ff;border:1px solid #91caff;border-radius:6px;padding:8px 16px;align-items:center;gap:12px;font-size:13px;color:var(--primary);margin:0 24px 12px}
+.batch-bar.show{display:flex}
+/* 响应式 */
+@media(max-width:768px){
+  .stats{grid-template-columns:1fr 1fr}
+  .form-grid{grid-template-columns:1fr}
+  .topbar-sub{display:none}
+  .toolbar{padding:12px 16px}
+  .main{padding:0 12px 16px}
+  .stats{padding:12px 16px}
+}
+</style>
+</head>
+<body>
+
+<!-- 顶栏 -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">👟</div>
+    <div>
+      <div class="topbar-title">步云鞋垫 · 价格填报系统</div>
+      <div class="topbar-sub">新乡步云鞋垫有限公司 · 内部版</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="rate-badge" onclick="openRateModal()">
+      <span>💱</span>
+      <span id="rateDisplay">1 USD = — CNY</span>
+      <span style="opacity:.7;font-size:11px">点击更新</span>
+    </div>
+    <button class="btn btn-success" onclick="openAddModal()">+ 新增产品</button>
+  </div>
+</div>
+
+<!-- 操作工具栏 -->
+<div class="toolbar">
+  <div class="search-wrap">
+    <input class="search-input" id="searchInput" placeholder="搜索型号、规格、备注..." oninput="handleSearch()">
+    <span class="search-icon">🔍</span>
+  </div>
+  <select class="filter-select" id="filterModel" onchange="handleFilter()">
+    <option value="">全部型号</option>
+  </select>
+  <select class="filter-select" id="filterQty" onchange="handleFilter()">
+    <option value="">全部数量</option>
+    <option value="small">小批量(&lt;50)</option>
+    <option value="mid">中批量(50-500)</option>
+    <option value="large">大批量(&gt;500)</option>
+  </select>
+  <button class="btn btn-default" onclick="exportData()">📥 导出</button>
+  <button class="btn btn-default" onclick="triggerImport()">📤 导入</button>
+  <button class="btn btn-default" onclick="loadData()">🔄 刷新</button>
+  <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImportFile(e)">
+</div>
+
+<!-- 批量操作栏 -->
+<div class="batch-bar" id="batchBar">
+  <span id="batchCount">已选 0 项</span>
+  <button class="btn btn-danger btn-sm" onclick="batchDelete()">🗑 批量删除</button>
+  <button class="btn btn-default btn-sm" onclick="clearSelection()">取消选择</button>
+</div>
+
+<!-- 统计卡片 -->
+<div class="stats" id="statsArea">
+  <div class="stat-card blue"><div class="stat-num" id="statTotal">—</div><div class="stat-label">产品总条目</div></div>
+  <div class="stat-card green"><div class="stat-num" id="statModels">—</div><div class="stat-label">型号种类</div></div>
+  <div class="stat-card orange"><div class="stat-num" id="statMinPrice">—</div><div class="stat-label">最低单价(¥)</div></div>
+  <div class="stat-card red"><div class="stat-num" id="statMaxPrice">—</div><div class="stat-label">最高单价(¥)</div></div>
+</div>
+
+<!-- 主内容区 -->
+<div class="main" id="mainContent">
+  <div class="loading"><div class="spin"></div>加载数据中...</div>
+</div>
+
+<!-- Toast -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- 图片预览 -->
+<div class="img-viewer" id="imgViewer" onclick="closeImgViewer()">
+  <button class="img-viewer-close" onclick="closeImgViewer()">✕</button>
+  <img id="imgViewerSrc" src="" alt="产品图片">
+</div>
+
+<!-- 新增/编辑弹窗 -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">新增产品</div>
+      <button class="modal-close" onclick="closeModal('editModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="section-title">📦 基础信息</div>
+        <div class="form-item">
+          <label class="form-label">产品型号<span class="req">*</span></label>
+          <input class="form-input" id="f_model" placeholder="如：AS01、2302、6041基础款">
+        </div>
+        <div class="form-item">
+          <label class="form-label">规格</label>
+          <input class="form-input" id="f_spec" placeholder="如：2.5cm、EU38-44、S/M/L">
+        </div>
+        <div class="form-item">
+          <label class="form-label">数量/最小起订量<span class="req">*</span></label>
+          <input class="form-input" id="f_quantity" type="number" placeholder="如：20、180、1800">
+        </div>
+        <div class="form-item">
+          <label class="form-label">人民币价格(¥)<span class="req">*</span></label>
+          <input class="form-input" id="f_priceCNY" type="number" step="0.01" placeholder="单位：元/件" oninput="autoCalcUSD()">
+        </div>
+        <div class="form-item">
+          <label class="form-label">美元价格($)</label>
+          <input class="form-input" id="f_priceUSD" type="number" step="0.0001" placeholder="自动换算，也可手动填写">
+          <span class="form-hint" id="usdHint">根据汇率自动计算</span>
+        </div>
+        <div class="section-title">⚖️ 重量与包装</div>
+        <div class="form-item">
+          <label class="form-label">克重(g)</label>
+          <input class="form-input" id="f_weight" placeholder="单只/双克重，如：120g">
+        </div>
+        <div class="form-item">
+          <label class="form-label">包装袋重量(g)</label>
+          <input class="form-input" id="f_bagWeight" placeholder="含包装袋的重量，如：30g">
+        </div>
+        <div class="form-item">
+          <label class="form-label">箱重(kg)</label>
+          <input class="form-input" id="f_boxWeight" placeholder="整箱毛重，如：15.5kg">
+        </div>
+        <div class="form-item">
+          <label class="form-label">箱子体积(cm³/CBM)</label>
+          <input class="form-input" id="f_volume" placeholder="如：60×40×30cm 或 0.072CBM">
+        </div>
+        <div class="section-title">🖼️ 图片与备注</div>
+        <div class="form-item full">
+          <label class="form-label">产品配图</label>
+          <div class="upload-zone" id="uploadZone" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+            <input type="file" accept="image/*" onchange="handleFileSelect(event)">
+            <div id="uploadPlaceholder">
+              <div style="font-size:32px;margin-bottom:8px">🖼️</div>
+              <div style="font-size:13px;color:var(--text3)">点击选择图片 或 拖拽至此处</div>
+              <div style="font-size:11px;color:#ccc;margin-top:4px">支持 JPG、PNG、GIF、WEBP，最大 10MB</div>
+            </div>
+            <div id="uploadPreview" class="upload-preview" style="display:none">
+              <img id="previewImg" src="" alt="预览">
+              <button class="remove-img" onclick="removeImage(event)">✕</button>
+            </div>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+            <span style="font-size:12px;color:var(--text3)">或输入图片URL：</span>
+            <input class="form-input" id="f_imageUrl" placeholder="https://..." style="flex:1;height:30px;font-size:12px" oninput="handleUrlInput()">
+          </div>
+          <input type="hidden" id="f_image">
+        </div>
+        <div class="form-item full">
+          <label class="form-label">备注</label>
+          <textarea class="form-textarea" id="f_remark" placeholder="颜色、材质、特殊说明等..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" onclick="closeModal('editModal')">取消</button>
+      <button class="btn btn-primary" onclick="saveProduct()" id="saveBtn">💾 保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 汇率设置弹窗 -->
+<div class="modal-overlay" id="rateModal">
+  <div class="modal rate-modal">
+    <div class="modal-header">
+      <div class="modal-title">💱 更新汇率</div>
+      <button class="modal-close" onclick="closeModal('rateModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#fffbe6;border:1px solid #ffe58f;border-radius:6px;padding:12px;margin-bottom:16px;font-size:13px">
+        <strong>⚠️ 注意：</strong>更新汇率后，可选择是否同步重算所有产品的美元价格（按 人民币 ÷ 新汇率）
+      </div>
+      <div class="form-item" style="margin-bottom:16px">
+        <label class="form-label">当前美元/人民币汇率</label>
+        <input class="form-input" id="rateInput" type="number" step="0.0001" placeholder="如：7.26">
+        <span class="form-hint">2026年5月10日参考汇率：1 USD = 7.26 CNY</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:13px">
+        <input type="checkbox" id="syncPrices" checked style="width:16px;height:16px">
+        <label for="syncPrices">同时重算所有产品美元价格（人民币价 ÷ 新汇率）</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" onclick="closeModal('rateModal')">取消</button>
+      <button class="btn btn-primary" onclick="saveRate()">✅ 确认更新</button>
+    </div>
+  </div>
+</div>
+
+<!-- 删除确认弹窗 -->
+<div class="modal-overlay" id="delModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title">⚠️ 确认删除</div>
+      <button class="modal-close" onclick="closeModal('delModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:14px;color:var(--text2)" id="delConfirmText">确定要删除该产品吗？此操作不可撤销。</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" onclick="closeModal('delModal')">取消</button>
+      <button class="btn btn-danger" onclick="confirmDelete()" id="delConfirmBtn">🗑 确认删除</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '';
+let allProducts = [];
+let settings = { exchangeRate: 7.26 };
+let editingId = null;
+let deleteTarget = null;
+let selectedIds = new Set();
+let currentPage = 1;
+const PAGE_SIZE = 30;
+
+// ===================== 数据加载 =====================
+async function loadData() {
+  try {
+    const res = await fetch(API + '/api/products');
+    const json = await res.json();
+    if (json.success) {
+      allProducts = json.data || [];
+      settings = json.settings || { exchangeRate: 7.26 };
+      document.getElementById('rateDisplay').textContent = `1 USD = ${settings.exchangeRate} CNY`;
+      renderAll();
+    }
+  } catch(e) {
+    document.getElementById('mainContent').innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><p>无法连接服务器，请确保服务已启动</p><p style="font-size:12px;color:#999;margin-top:8px">${e.message}</p></div>`;
+  }
+}
+
+// ===================== 渲染 =====================
+function getFiltered() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const fm = document.getElementById('filterModel').value;
+  const fq = document.getElementById('filterQty').value;
+  return allProducts.filter(p => {
+    if (q && !p.model.toLowerCase().includes(q) && !p.spec.toLowerCase().includes(q) && !(p.remark||'').toLowerCase().includes(q)) return false;
+    if (fm && p.model !== fm) return false;
+    if (fq) {
+      const qty = Number(p.quantity)||0;
+      if (fq === 'small' && qty >= 50) return false;
+      if (fq === 'mid' && (qty < 50 || qty > 500)) return false;
+      if (fq === 'large' && qty <= 500) return false;
+    }
+    return true;
+  });
+}
+
+function renderAll() {
+  updateFilters();
+  updateStats();
+  renderTable();
+}
+
+function updateFilters() {
+  const models = [...new Set(allProducts.map(p => p.model).filter(Boolean))].sort();
+  const sel = document.getElementById('filterModel');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">全部型号</option>' + models.map(m => `<option value="${m}" ${m===cur?'selected':''}>${m}</option>`).join('');
+}
+
+function updateStats() {
+  const data = getFiltered();
+  const prices = data.map(p => p.priceCNY).filter(v => v > 0);
+  document.getElementById('statTotal').textContent = data.length;
+  document.getElementById('statModels').textContent = new Set(data.map(p => p.model)).size;
+  document.getElementById('statMinPrice').textContent = prices.length ? Math.min(...prices).toFixed(2) : '—';
+  document.getElementById('statMaxPrice').textContent = prices.length ? Math.max(...prices).toFixed(2) : '—';
+}
+
+function renderTable() {
+  const filtered = getFiltered();
+  const main = document.getElementById('mainContent');
+
+  if (!filtered.length) {
+    main.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><p>暂无数据，点击右上角"新增产品"开始添加</p></div>`;
+    return;
+  }
+
+  // 按型号分组
+  const groups = {};
+  filtered.forEach(p => {
+    const k = p.model || '(未分组)';
+    if (!groups[k]) groups[k] = [];
+    groups[k].push(p);
+  });
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paged = filtered.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+
+  let html = '';
+
+  // 分组展示
+  const groupKeys = Object.keys(groups);
+  groupKeys.forEach(model => {
+    const items = groups[model];
+    html += `<div class="group-section">
+      <div class="group-header">
+        <div class="group-title">${escHtml(model)}<span class="group-count">${items.length} 条</span></div>
+        <button class="btn btn-primary btn-sm" onclick="openAddModal('${escHtml(model)}')">+ 添加规格</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th class="checkbox-col"><input type="checkbox" onclick="toggleGroupSelect('${escHtml(model)}', this)"></th>
+            <th>配图</th>
+            <th>型号</th>
+            <th>数量(MOQ)</th>
+            <th>人民币(¥)</th>
+            <th>美元($)</th>
+            <th>规格</th>
+            <th>克重</th>
+            <th>包装袋</th>
+            <th>箱重</th>
+            <th>体积</th>
+            <th>备注</th>
+            <th style="width:130px">操作</th>
+          </tr></thead>
+          <tbody>`;
+    items.forEach(p => {
+      html += `<tr>
+        <td class="checkbox-col"><input type="checkbox" data-id="${p.id}" ${selectedIds.has(p.id)?'checked':''} onchange="toggleSelect('${p.id}', this)"></td>
+        <td>${p.image ? `<img class="product-img" src="${escHtml(p.image)}" alt="产品图" onclick="viewImg('${escHtml(p.image)}')">` : '<div class="no-img">🖼️</div>'}</td>
+        <td><span class="model-tag">${escHtml(p.model)}</span></td>
+        <td><b>${escHtml(String(p.quantity))}</b> 件</td>
+        <td><span class="price-cny">¥ ${Number(p.priceCNY).toFixed(2)}</span></td>
+        <td><span class="price-usd">$ ${Number(p.priceUSD).toFixed(4)}</span></td>
+        <td>${p.spec ? `<span class="tag tag-spec">${escHtml(p.spec)}</span>` : '<span style="color:#ccc">—</span>'}</td>
+        <td>${p.weight ? `<span class="tag tag-weight">${escHtml(p.weight)}</span>` : '<span style="color:#ccc">—</span>'}</td>
+        <td>${p.bagWeight ? `<span class="tag tag-weight">${escHtml(p.bagWeight)}</span>` : '<span style="color:#ccc">—</span>'}</td>
+        <td>${p.boxWeight ? `<span class="tag tag-box">${escHtml(p.boxWeight)}</span>` : '<span style="color:#ccc">—</span>'}</td>
+        <td>${p.volume ? `<span class="tag tag-box">${escHtml(p.volume)}</span>` : '<span style="color:#ccc">—</span>'}</td>
+        <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--text3)">${escHtml(p.remark||'')}</td>
+        <td>
+          <div class="action-btns">
+            <button class="btn btn-primary btn-sm" onclick="openEditModal('${p.id}')">✏️ 编辑</button>
+            <button class="btn btn-danger btn-sm" onclick="openDelModal('${p.id}', '${escHtml(p.model)}')">🗑</button>
+          </div>
+        </td>
+      </tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+  });
+
+  // 分页
+  if (totalPages > 1) {
+    html += `<div style="background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);margin-top:16px">
+      <div class="pagination">
+        <span class="page-info">共 ${filtered.length} 条，第 ${currentPage}/${totalPages} 页</span>
+        <div class="page-btns">
+          <button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage<=1?'disabled':''}>‹</button>
+          ${Array.from({length:Math.min(totalPages,7)},(_,i)=>i+1).map(n=>`<button class="page-btn ${n===currentPage?'active':''}" onclick="goPage(${n})">${n}</button>`).join('')}
+          <button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage>=totalPages?'disabled':''}>›</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  main.innerHTML = html;
+}
+
+function goPage(n) {
+  const filtered = getFiltered();
+  const total = Math.ceil(filtered.length / PAGE_SIZE);
+  if (n < 1 || n > total) return;
+  currentPage = n;
+  renderTable();
+}
+
+function handleSearch() { currentPage = 1; renderAll(); }
+function handleFilter() { currentPage = 1; renderAll(); }
+
+// ===================== 选择逻辑 =====================
+function toggleSelect(id, el) {
+  if (el.checked) selectedIds.add(id); else selectedIds.delete(id);
+  updateBatchBar();
+}
+function toggleGroupSelect(model, el) {
+  allProducts.filter(p => p.model === model).forEach(p => {
+    if (el.checked) selectedIds.add(p.id); else selectedIds.delete(p.id);
+  });
+  updateBatchBar();
+  renderTable();
+}
+function clearSelection() { selectedIds.clear(); updateBatchBar(); renderTable(); }
+function updateBatchBar() {
+  const bar = document.getElementById('batchBar');
+  if (selectedIds.size > 0) {
+    bar.classList.add('show');
+    document.getElementById('batchCount').textContent = `已选 ${selectedIds.size} 项`;
+  } else {
+    bar.classList.remove('show');
+  }
+}
+async function batchDelete() {
+  if (!selectedIds.size) return;
+  if (!confirm(`确定删除选中的 ${selectedIds.size} 条记录吗？`)) return;
+  try {
+    const res = await fetch(API + '/api/products/batch-delete', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ ids: [...selectedIds] })
+    });
+    const json = await res.json();
+    if (json.success) { toast(json.message, 'success'); selectedIds.clear(); loadData(); }
+    else toast(json.message, 'error');
+  } catch(e) { toast('删除失败', 'error'); }
+}
+
+// ===================== 新增/编辑 =====================
+function openAddModal(model = '') {
+  editingId = null;
+  document.getElementById('modalTitle').textContent = '新增产品';
+  clearForm();
+  if (model) document.getElementById('f_model').value = model;
+  document.getElementById('editModal').classList.add('show');
+}
+
+async function openEditModal(id) {
+  editingId = id;
+  document.getElementById('modalTitle').textContent = '编辑产品';
+  try {
+    const res = await fetch(API + '/api/products/' + id);
+    const json = await res.json();
+    if (!json.success) return toast('获取数据失败', 'error');
+    const p = json.data;
+    document.getElementById('f_model').value = p.model || '';
+    document.getElementById('f_spec').value = p.spec || '';
+    document.getElementById('f_quantity').value = p.quantity || '';
+    document.getElementById('f_priceCNY').value = p.priceCNY || '';
+    document.getElementById('f_priceUSD').value = p.priceUSD || '';
+    document.getElementById('f_weight').value = p.weight || '';
+    document.getElementById('f_bagWeight').value = p.bagWeight || '';
+    document.getElementById('f_boxWeight').value = p.boxWeight || '';
+    document.getElementById('f_volume').value = p.volume || '';
+    document.getElementById('f_remark').value = p.remark || '';
+    document.getElementById('f_image').value = p.image || '';
+    document.getElementById('f_imageUrl').value = p.image && !p.image.startsWith('/uploads/') ? p.image : '';
+    if (p.image) {
+      document.getElementById('uploadPlaceholder').style.display = 'none';
+      document.getElementById('uploadPreview').style.display = 'block';
+      document.getElementById('previewImg').src = p.image;
+    }
+    document.getElementById('editModal').classList.add('show');
+  } catch(e) { toast('获取数据失败', 'error'); }
+}
+
+async function saveProduct() {
+  const model = document.getElementById('f_model').value.trim();
+  const quantity = document.getElementById('f_quantity').value.trim();
+  const priceCNY = document.getElementById('f_priceCNY').value.trim();
+  if (!model) { document.getElementById('f_model').classList.add('error'); return toast('请填写产品型号', 'warn'); }
+  if (!quantity) { document.getElementById('f_quantity').classList.add('error'); return toast('请填写数量', 'warn'); }
+  if (!priceCNY) { document.getElementById('f_priceCNY').classList.add('error'); return toast('请填写人民币价格', 'warn'); }
+
+  const body = {
+    model, quantity,
+    priceCNY: Number(priceCNY),
+    priceUSD: Number(document.getElementById('f_priceUSD').value) || Number((Number(priceCNY) / settings.exchangeRate).toFixed(4)),
+    spec: document.getElementById('f_spec').value.trim(),
+    weight: document.getElementById('f_weight').value.trim(),
+    bagWeight: document.getElementById('f_bagWeight').value.trim(),
+    boxWeight: document.getElementById('f_boxWeight').value.trim(),
+    volume: document.getElementById('f_volume').value.trim(),
+    image: document.getElementById('f_image').value.trim(),
+    remark: document.getElementById('f_remark').value.trim()
+  };
+
+  document.getElementById('saveBtn').disabled = true;
+  document.getElementById('saveBtn').textContent = '保存中...';
+  try {
+    const url = editingId ? API + '/api/products/' + editingId : API + '/api/products';
+    const method = editingId ? 'PUT' : 'POST';
+    const res = await fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    const json = await res.json();
+    if (json.success) {
+      toast(json.message, 'success');
+      closeModal('editModal');
+      loadData();
+    } else toast(json.message, 'error');
+  } catch(e) { toast('保存失败', 'error'); }
+  finally {
+    document.getElementById('saveBtn').disabled = false;
+    document.getElementById('saveBtn').innerHTML = '💾 保存';
+  }
+}
+
+function clearForm() {
+  ['f_model','f_spec','f_quantity','f_priceCNY','f_priceUSD','f_weight','f_bagWeight','f_boxWeight','f_volume','f_remark','f_image','f_imageUrl'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; el.classList.remove('error'); }
+  });
+  document.getElementById('uploadPlaceholder').style.display = 'block';
+  document.getElementById('uploadPreview').style.display = 'none';
+  document.getElementById('previewImg').src = '';
+}
+
+function autoCalcUSD() {
+  const cny = Number(document.getElementById('f_priceCNY').value);
+  if (cny > 0 && settings.exchangeRate > 0) {
+    const usd = (cny / settings.exchangeRate).toFixed(4);
+    document.getElementById('f_priceUSD').value = usd;
+    document.getElementById('usdHint').textContent = `= ¥${cny} ÷ ${settings.exchangeRate} (汇率)`;
+  }
+}
+
+// ===================== 删除 =====================
+function openDelModal(id, model) {
+  deleteTarget = id;
+  document.getElementById('delConfirmText').textContent = `确定要删除产品「${model}」的该条记录吗？此操作不可撤销。`;
+  document.getElementById('delModal').classList.add('show');
+}
+async function confirmDelete() {
+  if (!deleteTarget) return;
+  try {
+    const res = await fetch(API + '/api/products/' + deleteTarget, { method: 'DELETE' });
+    const json = await res.json();
+    if (json.success) { toast('删除成功', 'success'); closeModal('delModal'); loadData(); }
+    else toast(json.message, 'error');
+  } catch(e) { toast('删除失败', 'error'); }
+}
+
+// ===================== 汇率 =====================
+function openRateModal() {
+  document.getElementById('rateInput').value = settings.exchangeRate;
+  document.getElementById('rateModal').classList.add('show');
+}
+async function saveRate() {
+  const rate = Number(document.getElementById('rateInput').value);
+  if (!rate || rate <= 0) return toast('请输入有效汇率', 'warn');
+  const sync = document.getElementById('syncPrices').checked;
+  try {
+    const res = await fetch(API + '/api/settings', {
+      method: 'PUT', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ exchangeRate: rate, syncPrices: sync })
+    });
+    const json = await res.json();
+    if (json.success) {
+      settings.exchangeRate = rate;
+      document.getElementById('rateDisplay').textContent = `1 USD = ${rate} CNY`;
+      toast('汇率已更新' + (sync ? '，美元价格已同步重算' : ''), 'success');
+      closeModal('rateModal');
+      loadData();
+    }
+  } catch(e) { toast('更新失败', 'error'); }
+}
+
+// ===================== 图片 =====================
+function handleFileSelect(event) {
+  const file = event.target.files[0];
+  if (file) uploadFile(file);
+}
+function handleDragOver(event) {
+  event.preventDefault();
+  document.getElementById('uploadZone').classList.add('dragover');
+}
+function handleDrop(event) {
+  event.preventDefault();
+  document.getElementById('uploadZone').classList.remove('dragover');
+  const file = event.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) uploadFile(file);
+}
+async function uploadFile(file) {
+  const formData = new FormData();
+  formData.append('image', file);
+  try {
+    const res = await fetch(API + '/api/upload', { method: 'POST', body: formData });
+    const json = await res.json();
+    if (json.success) {
+      document.getElementById('f_image').value = json.url;
+      document.getElementById('uploadPlaceholder').style.display = 'none';
+      document.getElementById('uploadPreview').style.display = 'block';
+      document.getElementById('previewImg').src = json.url;
+      toast('图片上传成功', 'success');
+    }
+  } catch(e) { toast('图片上传失败', 'error'); }
+}
+function removeImage(e) {
+  e.stopPropagation();
+  document.getElementById('f_image').value = '';
+  document.getElementById('f_imageUrl').value = '';
+  document.getElementById('uploadPlaceholder').style.display = 'block';
+  document.getElementById('uploadPreview').style.display = 'none';
+  document.getElementById('previewImg').src = '';
+}
+function handleUrlInput() {
+  const url = document.getElementById('f_imageUrl').value.trim();
+  if (url) {
+    document.getElementById('f_image').value = url;
+    document.getElementById('uploadPlaceholder').style.display = 'none';
+    document.getElementById('uploadPreview').style.display = 'block';
+    document.getElementById('previewImg').src = url;
+  }
+}
+function viewImg(url) {
+  document.getElementById('imgViewerSrc').src = url;
+  document.getElementById('imgViewer').classList.add('show');
+}
+function closeImgViewer() { document.getElementById('imgViewer').classList.remove('show'); }
+
+// ===================== 导入导出 =====================
+async function exportData() {
+  try {
+    const a = document.createElement('a');
+    a.href = API + '/api/export';
+    a.download = 'products_export.json';
+    a.click();
+    toast('数据导出中...', 'success');
+  } catch(e) { toast('导出失败', 'error'); }
+}
+function triggerImport() { document.getElementById('importFile').click(); }
+function handleImportFile(e) {
+  const file = e ? e.target.files[0] : document.getElementById('importFile').files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (ev) => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      const products = data.products || data;
+      if (!Array.isArray(products)) return toast('文件格式不正确', 'error');
+      const res = await fetch(API + '/api/import', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ products })
+      });
+      const json = await res.json();
+      if (json.success) { toast(json.message, 'success'); loadData(); }
+      else toast(json.message, 'error');
+    } catch(err) { toast('文件解析失败：' + err.message, 'error'); }
+  };
+  reader.readAsText(file, 'utf-8');
+  e.target.value = '';
+}
+
+// ===================== 工具函数 =====================
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function escHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function toast(msg, type = 'info') {
+  const wrap = document.getElementById('toastWrap');
+  const icons = { success: '✅', error: '❌', warn: '⚠️', info: 'ℹ️' };
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span>${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
+  wrap.appendChild(el);
+  setTimeout(() => { el.style.animation = 'fadeOut .3s ease forwards'; setTimeout(() => el.remove(), 300); }, 2800);
+}
+// ESC 关闭
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay.show').forEach(m => m.classList.remove('show')); closeImgViewer(); } });
+// 点击遮罩关闭
+document.querySelectorAll('.modal-overlay').forEach(overlay => { overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('show'); }); });
+
+// 初始化
+loadData();
+</script>
+</body>
+</html>
